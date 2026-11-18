@@ -13,9 +13,17 @@ apt_refresh() {
     else note "apt-get update failed: package checks below may be wrong. Run 'sudo apt update' to see the error."; APT_REFRESHED=1; fi
 }
 
-pkg_installed() { LC_ALL=C dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "ok installed"; }
-# LC_ALL=C: apt translates "Candidate:" on non-English systems
-pkg_available() { LC_ALL=C apt-cache policy "$1" 2>/dev/null | grep -q 'Candidate: [^(]'; }
+# Output is captured first, never piped into 'grep -q': with pipefail, grep -q exiting early
+# kills the writer with SIGPIPE (exit 141) and the check fails even when it matched.
+# LC_ALL=C: apt translates "Candidate:" on non-English systems.
+pkg_installed() {
+    local out; out=$(LC_ALL=C dpkg-query -W -f='${Status}' "$1" 2>/dev/null)
+    [[ $out == *"ok installed"* ]]
+}
+pkg_available() {
+    local out; out=$(LC_ALL=C apt-cache policy "$1" 2>/dev/null)
+    [[ $out =~ Candidate:\ [^\(] ]]
+}
 
 # pkg_install pkg... : installs what exists, notes what doesn't. Returns 1 if anything was missing.
 pkg_install() {

@@ -32,7 +32,7 @@ module_vm() {
             info "VirtualBox detected"
             pkg_install virtualbox-guest-x11 virtualbox-guest-utils \
                 || note "VirtualBox guest packages not in repos; insert Guest Additions CD from the VirtualBox menu"
-            getent group vboxsf >/dev/null && ! id -nG "$USER" | grep -qw vboxsf && {
+            getent group vboxsf >/dev/null && ! [[ " $(id -nG "$USER") " == *" vboxsf "* ]] && {
                 as_root usermod -aG vboxsf "$USER"; note "Added to vboxsf (shared folders): log out and back in."; } ;;
         vmware)
             info "VMware detected"

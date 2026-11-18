@@ -42,7 +42,8 @@ install_blesh() {
 
 install_nerd_font() {
     local name="MesloLGS Nerd Font Mono" dir="$HOME/.local/share/fonts/Meslo"
-    if fc-list : family 2>/dev/null | grep -iq "$name"; then skip "Nerd Font already installed"; return 0; fi
+    local fonts; fonts=$(fc-list : family 2>/dev/null)
+    if grep -iqF "$name" <<<"$fonts"; then skip "Nerd Font already installed"; return 0; fi
     info "Installing $name"
     sh_run "t=\$(mktemp -d) && curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip -o \"\$t/m.zip\" && unzip -q \"\$t/m.zip\" -d \"\$t\" && mkdir -p '$dir' && find \"\$t\" -name '*.ttf' -exec mv {} '$dir'/ \\; ; rm -rf \"\$t\"; fc-cache -f >/dev/null 2>&1" \
         || note "Nerd Font install failed"
