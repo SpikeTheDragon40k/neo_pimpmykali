@@ -1,3 +1,15 @@
+neo-pimpmykali 3.0.0 - 2026-11-18
+  - Full rewrite as a modular project, script renamed to neo-pimpmykali.sh
+  - Supports Kali, Debian, Ubuntu, Parrot
+  - Merged mybashrc shell setup (bash, starship, ble.sh, modern CLI tools, Nerd Font)
+  - New tools for 2026 in tools.conf: AD, web/recon, cloud, AI categories
+  - Tools installed via apt first, then pipx / uv / go / GitHub releases
+  - New: --update, --dry-run, -y, interactive menu, log file
+  - Removed obsolete fixes: python2/impacket 0.9.19, crackmapexec, root login,
+    Nessus, course lab setups, mirror speedtest, lightdm theme, sublime, misc old fixes
+
+---- Original pimpmykali changelog below ----
+
 # Revision 1.8.1b - Updated Ghidra Download function
   - corrected download
 
