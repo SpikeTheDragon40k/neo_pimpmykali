@@ -6,6 +6,7 @@ install_cli_tools() {
     info "Installing modern CLI tools"
     pkg_install bash bash-completion tree rsync fontconfig xz-utils micro nano libnotify-bin pciutils \
         btop duf ripgrep bat eza trash-cli zoxide fzf multitail fastfetch
+    cli_release_fallbacks
     # Debian/Ubuntu name bat 'batcat'
     if ! have bat && have batcat; then run mkdir -p "$HOME/.local/bin"; run ln -sf "$(command -v batcat)" "$HOME/.local/bin/bat"; fi
     if ! have zoxide; then
@@ -14,7 +15,21 @@ install_cli_tools() {
     if ! have fzf && [ ! -d "$HOME/.fzf" ]; then
         run git clone -q --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf" && run "$HOME/.fzf/install" --bin >/dev/null
     fi
-    have fastfetch || note "fastfetch not in your repos (optional)"
+    have fastfetch || [ "$DRY_RUN" = 1 ] || note "fastfetch could not be installed (optional)"
+}
+
+# When apt doesn't have them, get the official static builds from GitHub into ~/.local/bin
+cli_release_fallbacks() {
+    local x=x86_64 ff=amd64 duf=x86_64 mi=linux64-static
+    if [ "$ARCH" = arm64 ]; then x=aarch64 ff=aarch64-polyfilled duf=arm64 mi=linux-arm64; fi
+    have rg       || gh_install BurntSushi/ripgrep     "ripgrep-.*-${x}-unknown-linux-musl\.tar\.gz$" rg
+    have bat      || have batcat || gh_install sharkdp/bat "bat-v.*-${x}-unknown-linux-musl\.tar\.gz$" bat
+    have eza      || gh_install eza-community/eza      "eza_${x}-unknown-linux-gnu\.tar\.gz$" eza
+    have duf      || gh_install muesli/duf             "duf_.*_linux_${duf}\.tar\.gz$" duf
+    have btop     || gh_install aristocratos/btop      "btop-${x}-unknown-linux-musl\.tar\.gz$" btop
+    have fastfetch || gh_install fastfetch-cli/fastfetch "fastfetch-linux-${ff}\.tar\.gz$" fastfetch
+    have micro    || gh_install micro-editor/micro     "micro-.*-${mi}\.tar\.gz$" micro
+    have trash-put || pipx_install trash-cli trash-put
 }
 
 install_blesh() {
