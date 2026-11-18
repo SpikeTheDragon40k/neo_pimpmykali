@@ -27,7 +27,7 @@ system_upgrade() {
 base_packages() {
     info "Installing base packages"
     pkg_install curl wget git unzip jq tmux rlwrap build-essential python3-venv pipx \
-        "linux-headers-$(uname -r)" net-tools dnsutils locate htop samba-common-bin nmap
+        "linux-headers-$(uname -r)" net-tools bind9-dnsutils locate htop samba-common-bin nmap
 }
 
 fix_smbconf() {
