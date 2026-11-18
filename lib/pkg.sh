@@ -9,11 +9,13 @@ apt_refresh() {
         note "apt package lists are older than 1 day: dry-run may wrongly report packages as 'not available'. Run 'sudo apt update' first."
     fi
     info "Refreshing apt package lists"
-    as_root apt-get update -qq && APT_REFRESHED=1
+    if as_root apt-get update -qq; then APT_REFRESHED=1
+    else note "apt-get update failed: package checks below may be wrong. Run 'sudo apt update' to see the error."; APT_REFRESHED=1; fi
 }
 
-pkg_installed() { dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "ok installed"; }
-pkg_available() { apt-cache policy "$1" 2>/dev/null | grep -q 'Candidate: [^(]'; }
+pkg_installed() { LC_ALL=C dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "ok installed"; }
+# LC_ALL=C: apt translates "Candidate:" on non-English systems
+pkg_available() { LC_ALL=C apt-cache policy "$1" 2>/dev/null | grep -q 'Candidate: [^(]'; }
 
 # pkg_install pkg... : installs what exists, notes what doesn't. Returns 1 if anything was missing.
 pkg_install() {
