@@ -93,3 +93,32 @@ install_chrome() {
     as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$deb" || note "Chrome install failed"
     run rm -f "$deb"
 }
+
+install_ligolo() {
+    local a=amd64; [ "$ARCH" = arm64 ] && a=arm64
+    gh_install nicocha30/ligolo-ng "ligolo-ng_proxy_.*_linux_${a}\.tar\.gz$" ligolo-proxy proxy
+    gh_install nicocha30/ligolo-ng "ligolo-ng_agent_.*_linux_${a}\.tar\.gz$" ligolo-agent agent
+}
+
+install_kubectl() {
+    have kubectl && return 0
+    local a=amd64 v; [ "$ARCH" = arm64 ] && a=arm64
+    v=$(curl -fsSL https://dl.k8s.io/release/stable.txt) || { note "kubectl: could not get latest version"; return 1; }
+    run mkdir -p "$HOME/.local/bin"
+    run curl -fsSL "https://dl.k8s.io/release/$v/bin/linux/$a/kubectl" -o "$HOME/.local/bin/kubectl" && run chmod +x "$HOME/.local/bin/kubectl" \
+        || note "kubectl download failed"
+}
+
+install_vscode() {
+    have code && { skip "VS Code already installed"; return 0; }
+    local a=x64 deb=/tmp/vscode.deb; [ "$ARCH" = arm64 ] && a=arm64
+    run curl -fsSL "https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-$a" -o "$deb" || { note "VS Code download failed"; return 1; }
+    as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$deb" || note "VS Code install failed"
+    run rm -f "$deb"
+}
+
+install_sliver() {
+    local a=amd64; [ "$ARCH" = arm64 ] && a=arm64
+    gh_install BishopFox/sliver "sliver-server_linux-${a}$" sliver-server
+    gh_install BishopFox/sliver "sliver-client_linux-${a}$" sliver-client
+}

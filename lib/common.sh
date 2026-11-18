@@ -38,7 +38,7 @@ ask() {
 # run CMD... : execute, or just print it in dry-run mode
 run() {
     if [ "$DRY_RUN" = 1 ]; then
-        printf '  %s[dry-run]%s %s\n' "$YELLOW" "$RESET" "$*"
+        printf '  %s[dry-run]%s %s\n' "$YELLOW" "$RESET" "$*" >&2
         return 0
     fi
     "$@"

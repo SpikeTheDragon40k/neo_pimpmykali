@@ -5,6 +5,9 @@ APT_REFRESHED=0
 
 apt_refresh() {
     [ "$APT_REFRESHED" = 1 ] && return 0
+    if [ "$DRY_RUN" = 1 ] && [ -z "$(find /var/lib/apt/lists -maxdepth 1 -name '*Packages*' -mtime -1 2>/dev/null | head -n1)" ]; then
+        note "apt package lists are older than 1 day: dry-run may wrongly report packages as 'not available'. Run 'sudo apt update' first."
+    fi
     info "Refreshing apt package lists"
     as_root apt-get update -qq && APT_REFRESHED=1
 }
@@ -57,9 +60,9 @@ go_install() {
     run go install "$spec" || { note "go install failed: $spec"; return 1; }
 }
 
-# gh_install owner/repo asset-regex bin : downloads the latest release asset into ~/.local/bin
+# gh_install owner/repo asset-regex bin [name-inside-archive] : latest release asset into ~/.local/bin
 gh_install() {
-    local repo=$1 pattern=$2 bin=$3 url tmp
+    local repo=$1 pattern=$2 bin=$3 inner=${4:-$3} url tmp
     if have "$bin"; then skip "$bin already installed"; return 0; fi
     url=$(curl -fsSL "https://api.github.com/repos/$repo/releases/latest" \
         | grep -oE '"browser_download_url": *"[^"]+"' | cut -d'"' -f4 | grep -E "$pattern" | head -n1)
@@ -72,10 +75,10 @@ gh_install() {
     case "$url" in
         *.tar.gz|*.tgz) tar -xzf "$tmp/asset" -C "$tmp" ;;
         *.zip)          unzip -q "$tmp/asset" -d "$tmp" ;;
-        *)              mv "$tmp/asset" "$tmp/$bin" ;;
+        *)              mv "$tmp/asset" "$tmp/$inner" ;;
     esac
     local found
-    found=$(find "$tmp" -type f -name "$bin" | head -n1)
+    found=$(find "$tmp" -type f -name "$inner" | head -n1)
     if [ -n "$found" ]; then install -m 755 "$found" "$HOME/.local/bin/$bin"; ok "$bin installed to ~/.local/bin"
     else note "$bin not found inside $url"; fi
     rm -rf "$tmp"
