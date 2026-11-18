@@ -36,7 +36,11 @@ install_category() {
     local cat=$1 name apt method src bin
     section "Tools: $cat"
     while IFS="|" read -r -u 3 name apt method src bin; do
-        install_tool "$name" "$apt" "$method" "$src" "$bin"
+        # Extras are optional: ask per tool, a 'no' just skips to the next one
+        if [ "$cat" = extra ] && ! { [ -n "$bin" ] && have "$bin"; }; then
+            ask "Install $name?" y || { skip "$name skipped"; continue; }
+        fi
+        install_tool "$name" "$apt" "$method" "$src" "$bin" || true
     done 3< <(tools_in "$cat")
 }
 
