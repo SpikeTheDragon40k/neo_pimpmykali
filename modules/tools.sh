@@ -2,7 +2,8 @@
 # Tool installer driven by tools.conf
 
 TOOLS_CONF="$ROOT_DIR/tools.conf"
-TOOL_CATEGORIES="ad web cloud ai extra"
+TOOL_CATEGORIES="ad web cloud ai extra"   # installed by default
+OPTIONAL_CATEGORIES="ai-local"            # only when asked for by name
 
 # Prints trimmed "name|apt|method|source|bin" lines for a category
 tools_in() {
@@ -34,7 +35,6 @@ install_tool() {
 install_category() {
     local cat=$1 name apt method src bin
     section "Tools: $cat"
-    [ "$cat" = ai ] && ! ask "Install AI-assisted tools (claude-code, ollama, Kali MCP server)?" y && return 0
     while IFS="|" read -r -u 3 name apt method src bin; do
         install_tool "$name" "$apt" "$method" "$src" "$bin"
     done 3< <(tools_in "$cat")
@@ -43,7 +43,10 @@ install_category() {
 module_tools() {
     local cats=${1:-$TOOL_CATEGORIES} c
     for c in ${cats//,/ }; do
-        case " $TOOL_CATEGORIES " in *" $c "*) install_category "$c" ;; *) warn "Unknown tool category '$c' (valid: $TOOL_CATEGORIES)" ;; esac
+        case " $TOOL_CATEGORIES $OPTIONAL_CATEGORIES " in
+            *" $c "*) install_category "$c" ;;
+            *) warn "Unknown tool category '$c' (valid: $TOOL_CATEGORIES $OPTIONAL_CATEGORIES)" ;;
+        esac
     done
 }
 
@@ -77,12 +80,20 @@ install_pdtm_suite() {
 }
 
 install_claude_code() {
-    ask "Install Claude Code (native installer from claude.ai)?" y || return 0
     sh_run "curl -fsSL https://claude.ai/install.sh | bash" || note "Claude Code install failed"
 }
 
+install_opencode() {
+    sh_run "curl -fsSL https://opencode.ai/install | bash" || note "OpenCode install failed"
+}
+
 install_ollama() {
-    ask "Install ollama (local LLM runtime, ~1GB+ with models)?" n || return 0
+    local ram_gb
+    ram_gb=$(awk '/MemTotal/ {printf "%d", $2/1024/1024}' /proc/meminfo)
+    if [ "${ram_gb:-0}" -lt 8 ]; then
+        warn "Only ${ram_gb}GB RAM: local models will be very slow or won't load."
+        ask "Install ollama anyway?" n || return 0
+    fi
     sh_run "curl -fsSL https://ollama.com/install.sh | sh" || note "ollama install failed"
 }
 

@@ -26,7 +26,8 @@ tools (pipx, go, your shell config) land in your own home.
 | `--core` | Kali signing key, apt hash fix, full-upgrade, base packages, smb.conf, nmap shellshock fix, hushlogin, no PC beep |
 | `--toolchain` | go, rust (rustup), pipx, uv |
 | `--shell` | bash as default shell, `.bashrc` from mybashrc, starship, ble.sh, eza, bat, zoxide, fzf, btop, fastfetch, Nerd Font |
-| `--tools [ad,web,cloud,ai,extra]` | tools by category (default: all) |
+| `--tools [ad,web,cloud,ai,extra]` | tools by category (default: all of these) |
+| `--tools ai-local` | ollama for local models. Heavy, never part of `--all` |
 | `--wordlists` | SecLists + decompressed rockyou |
 | `--vm` | guest tools for VirtualBox/VMware/QEMU/Hyper-V, disables screen lock and power saving |
 | `--update` | updates apt, pipx, uv, pdtm, go tools, rust, nuclei templates and this repo |
@@ -45,7 +46,8 @@ The list lives in [`tools.conf`](tools.conf), one line per tool. The apt package
 - **AD / internal**: netexec, impacket, BloodHound CE (bloodhound-cli + docker), bloodhound-ce-python, certipy, bloodyAD, evil-winrm-py, coercer, pywhisker, kerbrute, ligolo-ng, sliver, responder
 - **Web / recon**: ProjectDiscovery via pdtm (nuclei, httpx, subfinder, katana, naabu, dnsx, interactsh), ffuf, feroxbuster, gowitness v3, arjun, dalfox, waybackurls, assetfinder
 - **Cloud**: awscli, azure-cli, kubectl, trivy, pacu, prowler, ScoutSuite, roadrecon, azurehound
-- **AI** (asks first): Claude Code, ollama, Kali MCP server
+- **Cloud AI** (`ai`, light, models run in the cloud): Claude Code, OpenCode, Kali MCP server
+- **Local AI** (`ai-local`, opt-in only): ollama. Warns if the machine has less than 8GB RAM
 - **Extras**: ghidra, flameshot, VS Code (code-oss), Google Chrome
 
 ## Shell

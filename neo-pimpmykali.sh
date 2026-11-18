@@ -31,7 +31,8 @@ Modules:
   --toolchain         go, rust, pipx, uv
   --shell             your bash setup (starship, ble.sh, eza, zoxide, fzf, Nerd Font)
   --tools [LIST]      tools by category, comma separated (default: all)
-                      categories: ${TOOL_CATEGORIES// /, }
+                      default: ${TOOL_CATEGORIES// /, }
+                      optional: ${OPTIONAL_CATEGORIES} (ollama, heavy; never part of --all)
   --wordlists         SecLists + rockyou
   --vm                hypervisor guest tools, disable lock/power saving
   --update            update apt, pipx, uv, pdtm, go tools, rust and this repo
@@ -68,7 +69,7 @@ EOF
         3) DO=(shell) ;;
         4) DO=(vm) ;;
         5) DO=(update) ;;
-        6) read -r -p "  Categories (${TOOL_CATEGORIES// /,}): " TOOL_LIST; DO=(toolchain tools) ;;
+        6) read -r -p "  Categories (${TOOL_CATEGORIES// /,},$OPTIONAL_CATEGORIES): " TOOL_LIST; DO=(toolchain tools) ;;
         *) exit 0 ;;
     esac
 }
